@@ -1,0 +1,41 @@
+name: Internship Monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub's minimum)
+  workflow_dispatch:          # lets you run it manually to test
+
+permissions:
+  contents: write             # needed to save the "already seen" state
+
+concurrency:
+  group: internship-monitor
+  cancel-in-progress: false   # never let two runs race on the state file
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check for new internships
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_SERVER: ${{ secrets.NTFY_SERVER }}     # optional; blank = ntfy.sh
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }} # optional (Pushover instead of ntfy)
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}   # optional
+        run: python monitor.py
+
+      - name: Save state
+        run: |
+          if [[ -n "$(git status --porcelain seen_ids.json)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add seen_ids.json
+            git commit -m "Update seen listings [skip ci]"
+            git push
+          fi
