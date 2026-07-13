@@ -189,7 +189,7 @@ def notify(title, message, url):
     if not topic:
         print("ERROR: set NTFY_TOPIC (or PUSHOVER_TOKEN + PUSHOVER_USER).", file=sys.stderr)
         sys.exit(1)
-    server = os.environ.get("NTFY_SERVER", "https://ntfy.sh").rstrip("/")
+    server = (os.environ.get("NTFY_SERVER") or "https://ntfy.sh").rstrip("/")
     payload = {"topic": topic, "title": title, "message": message, "tags": ["briefcase"]}
     if url:
         payload["click"] = url
