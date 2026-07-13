@@ -25,6 +25,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 
 # ---------------------------------------------------------------------------
 # Sources. "key" namespaces each source's IDs so repos can't collide.
@@ -176,7 +177,6 @@ def notify(title, message, url):
         return
     po_token, po_user = os.environ.get("PUSHOVER_TOKEN"), os.environ.get("PUSHOVER_USER")
     if po_token and po_user:
-        import urllib.parse
         data = urllib.parse.urlencode({
             "token": po_token, "user": po_user, "title": title,
             "message": message, "url": url, "url_title": "Apply now",
